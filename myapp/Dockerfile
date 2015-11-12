@@ -16,4 +16,4 @@ EXPOSE 5001
 
 # Serve using gunicorn
 # Note this should additionally be behind nginx
-CMD gunicorn warfarin:app -w 4 -b 0.0.0.0:5001
+CMD gunicorn server:app -w 4 -b 0.0.0.0:5001
