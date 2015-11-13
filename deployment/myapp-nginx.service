@@ -1,0 +1,30 @@
+[Unit]
+Description=NGINX Proxy Server
+
+# Requirements
+Requires=docker.service
+Requires=myapp.service
+
+# Dependency ordering
+After=docker.service
+After=myapp.service
+
+[Service]
+# Let processes take awhile to start up (for first run Docker containers)
+TimeoutStartSec=300
+
+# Change killmode from "control-group" to "none" to let Docker remove
+# work correctly.
+KillMode=none
+
+# Pre-start and Start
+## Directives with "=-" are allowed to fail without consequence
+ExecStartPre=-/usr/bin/docker kill myapp-nginx
+ExecStartPre=-/usr/bin/docker rm myapp-nginx
+ExecStart=/usr/bin/docker run --name myapp-nginx -p 80:80 --link myapp-server:backend myapp-nginx
+
+# Stop
+ExecStop=/usr/bin/docker stop myapp-nginx
+
+[Install]
+WantedBy=multi-user.target

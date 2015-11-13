@@ -1,0 +1,37 @@
+[Unit]
+Description=My App Server
+
+# Requirements
+Requires=docker.service
+Requires=myapp-redis.service
+
+# Dependency ordering
+After=docker.service
+After=myapp-redis.service
+
+[Service]
+
+# Let processes take awhile to start up (for first run Docker containers)
+TimeoutStartSec=500
+
+KillMode=none
+
+# Get CoreOS environment vars
+EnvironmentFile=/etc/environment
+
+# Note directives with "=-" are allowed to fail
+
+ExecStartPre=-/usr/bin/docker kill myapp-server
+ExecStartPre=-/usr/bin/docker rm myapp-server
+
+
+# You could instead use a quay.io account
+#ExecStartPre=-/usr/bin/docker login -e="." -u="quayaccount+myapp" -p="QUAYPASSWORD" quay.io
+#ExecStartPre=-/usr/bin/docker pull quay.io/quayaccount/myapp-server
+
+ExecStart=/usr/bin/docker run --rm --name myapp-server --link myapp-redis:redis hardbyte/myapp-server
+
+ExecStop=/usr/bin/docker stop myapp-server
+
+[Install]
+WantedBy=multi-user.target
